@@ -2,10 +2,45 @@ package ru.vsu.cs.kg26.g72.lunevmaksim.demo1;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
 // 1200 x 1000
 public class DrawPanel extends JPanel {
+    // Массив для хранения высоты (Y) трех клубов дыма
+    private final int[] smokeY = new int[]{310, 260, 210};
+    // Массив для горизонтального смещения (X) каждого клуба дыма
+    private final int[] smokeX = new int[]{245, 235, 255};
+    // Массив для размеров (диаметра) клубов дыма
+    private final int[] smokeSize = new int[]{40, 50, 65};
+
+    public DrawPanel() {
+        // Таймер обновляет анимацию каждые 40 миллисекунд (~25 FPS)
+        Timer timer = new Timer(40, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                for (int i = 0; i < smokeY.length; i++) {
+                    smokeY[i] -= 2; // Дым поднимается вверх
+
+                    // Небольшое покачивание влево-вправо от ветра
+                    if (smokeY[i] % 10 == 0) {
+                        smokeX[i] += (Math.random() > 0.5) ? 3 : -3;
+                    }
+
+                    // Если дым поднялся слишком высоко, возвращаем его к дымоходу
+                    if (smokeY[i] < 50) {
+                        smokeY[i] = 255;
+                        smokeX[i] = 245 + (int)(Math.random() * 15 - 7); // Сброс позиции X с небольшим разбросом
+                    }
+                }
+                repaint(); // Перерисовываем всю панель
+            }
+        });
+        timer.start(); // Запуск таймера при создании панели
+    }
     @Override
     public void paint(Graphics gr) {
+        AnimationExample panel = new AnimationExample();
         Graphics2D g = (Graphics2D) gr;
         super.paint(g);
 
@@ -40,6 +75,14 @@ public class DrawPanel extends JPanel {
         gr.setColor(Color.BLACK);
         gr.drawRect(235, 325, 50, 200);
         gr.drawRect(217, 310, 85, 15);
+
+        // Анимация дыма из дымохода
+        gr.setColor(new Color(220, 220, 220));
+        for (int i = 0; i < smokeY.length; i++) {
+            // Центрируем круги по мере их увеличения
+            int currentX = smokeX[i] - (smokeSize[i] / 2) + 15;
+            gr.fillOval(currentX, smokeY[i], smokeSize[i], smokeSize[i]);
+        }
 
         // Крыша дома
         gr.setColor(Color.RED);
