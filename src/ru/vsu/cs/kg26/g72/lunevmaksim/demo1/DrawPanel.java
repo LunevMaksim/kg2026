@@ -4,167 +4,315 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
-// 1200 x 1000
 public class DrawPanel extends JPanel {
-    // Массив для хранения высоты (Y) трех клубов дыма
-    private final int[] smokeY = new int[]{310, 260, 210};
-    // Массив для горизонтального смещения (X) каждого клуба дыма
-    private final int[] smokeX = new int[]{245, 235, 255};
-    // Массив для размеров (диаметра) клубов дыма
-    private final int[] smokeSize = new int[]{40, 50, 65};
+
+    // Класс для частицы дыма
+    private static class SmokeParticle {
+        double x, y;
+        double size;
+        double alpha;
+
+        public SmokeParticle(double x, double y, double size, double alpha) {
+            this.x = x;
+            this.y = y;
+            this.size = size;
+            this.alpha = alpha;
+        }
+    }
+
+    // Класс для анимированной птицы
+    private static class Bird {
+        double x, baseY;
+        double speed;
+        double wingPhase; // Фаза взмаха крыльев
+
+        public Bird(double x, double baseY, double speed, double wingPhase) {
+            this.x = x;
+            this.baseY = baseY;
+            this.speed = speed;
+            this.wingPhase = wingPhase;
+        }
+    }
+
+    private final List<SmokeParticle> smokeList = new ArrayList<>();
+    private final List<Bird> birdList = new ArrayList<>();
+    private final Random random = new Random();
+
+    private int cloudOffsetX = 0; // Для движения облаков
+    private double animTime = 0;  // Общее время для анимации синусоиды
 
     public DrawPanel() {
-        // Таймер обновляет анимацию каждые 40 миллисекунд (~25 FPS)
-        Timer timer = new Timer(40, new ActionListener() {
+        // Начальные частицы дыма
+        for (int i = 0; i < 6; i++) {
+            smokeList.add(new SmokeParticle(260, 310 - i * 35, 30 + i * 8, 200 - i * 30));
+        }
+
+        // Создаем стаю птиц на разной высоте и с разной скоростью
+        birdList.add(new Bird(100, 150, 2.5, 0.0));
+        birdList.add(new Bird(150, 130, 2.7, 0.5));
+        birdList.add(new Bird(220, 170, 2.3, 1.0));
+        birdList.add(new Bird(600, 120, 3.0, 0.2));
+        birdList.add(new Bird(660, 140, 2.8, 0.8));
+
+        // Таймер обновления кадра (~30 FPS)
+        Timer timer = new Timer(33, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                for (int i = 0; i < smokeY.length; i++) {
-                    smokeY[i] -= 2; // Дым поднимается вверх
+                animTime += 0.15; // Увеличиваем счетчик времени анимации
 
-                    // Небольшое покачивание влево-вправо от ветра
-                    if (smokeY[i] % 10 == 0) {
-                        smokeX[i] += (Math.random() > 0.5) ? 3 : -3;
-                    }
+                // 1. Анимация дыма
+                for (SmokeParticle particle : smokeList) {
+                    particle.y -= 2.0;
+                    particle.x += 1.5;
+                    particle.size += 0.4;
+                    particle.alpha -= 1.8;
 
-                    // Если дым поднялся слишком высоко, возвращаем его к дымоходу
-                    if (smokeY[i] < 50) {
-                        smokeY[i] = 255;
-                        smokeX[i] = 245 + (int)(Math.random() * 15 - 7); // Сброс позиции X с небольшим разбросом
+                    if (particle.alpha <= 0 || particle.y < 50) {
+                        particle.x = 255 + random.nextInt(10);
+                        particle.y = 310;
+                        particle.size = 25;
+                        particle.alpha = 210;
                     }
                 }
-                repaint(); // Перерисовываем всю панель
+
+                // 2. Анимация движения облаков
+                cloudOffsetX += 1;
+                if (cloudOffsetX > 1200) {
+                    cloudOffsetX = -400;
+                }
+
+                // 3. Анимация птиц
+                for (Bird bird : birdList) {
+                    bird.x += bird.speed; // Полёт вправо
+
+                    // Если птица улетела за экран, возвращаем её влево
+                    if (bird.x > 1250) {
+                        bird.x = -60;
+                        bird.baseY = 100 + random.nextInt(120); // Смена высоты
+                    }
+                }
+
+                repaint();
             }
         });
-        timer.start(); // Запуск таймера при создании панели
+        timer.start();
     }
+
     @Override
-    public void paint(Graphics gr) {
-        AnimationExample panel = new AnimationExample();
+    protected void paintComponent(Graphics gr) {
+        super.paintComponent(gr);
         Graphics2D g = (Graphics2D) gr;
-        super.paint(g);
 
-        // Земля
-        gr.setColor(new Color(154, 205, 50));
-        gr.fillRect(-1, 700, 1201, 501);
+        // Включаем сглаживание
+        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-        // Небо
-        gr.setColor(new Color(0, 191, 255));
-        gr.fillRect(-1, 0, 1201, 700);
+        // --- 1. Небо ---
+        g.setColor(new Color(135, 206, 235));
+        g.fillRect(0, 0, 1200, 700);
 
-        // Облака
-        gr.setColor(Color.WHITE);
-        gr.fillOval(75, 100, 300, 75);
-        gr.fillOval(130, 75, 90, 90);
-        gr.fillOval(200, 60, 100, 100);
-
-        gr.fillOval(500, 200, 200, 50);
-        gr.fillOval(550, 180, 60, 60);
-        gr.fillOval(585, 175, 80, 70);
-
-        // Основание дома
-        gr.setColor(new Color(255, 239, 213));
-        gr.fillRect(25, 525, 300, 300);
-        gr.setColor(Color.BLACK);
-        gr.drawRect(25, 525, 300, 300);
-
-        // Дымоход
-        gr.setColor(Color.RED);
-        gr.fillRect(235, 325, 50, 200);
-        gr.fillRect(217, 310, 85, 15);
-        gr.setColor(Color.BLACK);
-        gr.drawRect(235, 325, 50, 200);
-        gr.drawRect(217, 310, 85, 15);
-
-        // Анимация дыма из дымохода
-        gr.setColor(new Color(220, 220, 220));
-        for (int i = 0; i < smokeY.length; i++) {
-            // Центрируем круги по мере их увеличения
-            int currentX = smokeX[i] - (smokeSize[i] / 2) + 15;
-            gr.fillOval(currentX, smokeY[i], smokeSize[i], smokeSize[i]);
+        // --- 2. Солнце ---
+        g.setColor(new Color(255, 223, 0));
+        g.fillOval(950, 80, 100, 100);
+        g.setStroke(new BasicStroke(2));
+        for (int i = 0; i < 16; i++) {
+            double angle = i * (2 * Math.PI / 16);
+            int startX = 1000 + (int) (60 * Math.cos(angle));
+            int startY = 130 + (int) (60 * Math.sin(angle));
+            int endX = 1000 + (int) (85 * Math.cos(angle));
+            int endY = 130 + (int) (85 * Math.sin(angle));
+            g.drawLine(startX, startY, endX, endY);
         }
 
-        // Крыша дома
-        gr.setColor(Color.RED);
-        int[] xPoints = {25, 175, 325};
-        int[] yPoints = {525, 350, 525};
-        gr.fillPolygon(xPoints, yPoints, 3);
-        gr.setColor(Color.BLACK);
-        gr.drawLine(175, 350, 25, 525);
-        gr.drawLine(175, 350, 325, 525);
+        // --- 3. Облака (движущиеся) ---
+        drawCloud(g, 100 + cloudOffsetX, 100, 1.0);
+        drawCloud(g, -500 + cloudOffsetX, 150, 0.8);
+        drawCloud(g, 600 + cloudOffsetX, 80, 1.2);
 
-        // Окна дома
-        gr.setColor(Color.CYAN);
-        gr.fillRect(60, 565, 80, 100);
-        gr.fillRect(200, 565, 80, 100);
-        gr.setColor(Color.BLACK);
-        gr.drawRect(60, 565, 80, 100);
-        gr.drawRect(200, 565, 80, 100);
+        // --- 4. Анимированные Птицы в небе ---
+        for (Bird bird : birdList) {
+            // Волнообразное покачивание по Y за счет sin()
+            double currentY = bird.baseY + Math.sin(animTime + bird.wingPhase) * 5.0;
+            // Амплитуда взмаха крыла меняется со временем
+            double wingFlap = Math.sin(animTime * 2 + bird.wingPhase) * 10.0;
 
-        gr.drawLine(100, 565, 100, 665);
-        gr.drawLine(60, 615, 140, 615);
-        gr.drawLine(240, 565, 240, 665);
-        gr.drawLine(200, 615, 280, 615);
-
-
-        // Дверь дома
-        gr.setColor(new Color(139, 69, 19));
-        gr.fillRect(130, 725, 80, 100);
-        gr.setColor(Color.BLACK);
-        gr.drawRect(130, 725, 80, 100);
-
-        // Ручка двери дома
-        gr.fillRect(135, 775, 10, 10);
-
-        // Солнце
-        gr.setColor(Color.YELLOW);
-        ((Graphics2D) gr).setStroke(new BasicStroke(2));
-        for (int i = 0; i < 21; i++) {
-            double angle = i * (2 * Math.PI / 21);
-            int endX = 950 + (int) (90 * Math.cos(angle));
-            int endY = 200 + (int) (90 * Math.sin(angle));
-            gr.drawLine(950, 200, endX, endY);
+            drawAnimatedBird(g, (int) bird.x, (int) currentY, wingFlap);
         }
-        ((Graphics2D) gr).setStroke(new BasicStroke(1));
-        gr.setColor(Color.YELLOW);
-        gr.fillOval(900, 150, 100, 100);
 
-        // Ствол дерева
-        gr.setColor(new Color(139, 69, 19));
-        gr.fillRect(1000, 550, 75, 200);
-        gr.setColor(Color.BLACK);
-        gr.drawRect(1000, 550, 75, 200);
+        // --- 5. Земля / Трава ---
+        g.setColor(new Color(124, 252, 0));
+        g.fillRect(0, 650, 1200, 350);
 
-        // Листва дерева
-        gr.setColor(new Color(0, 128, 0));
-        gr.fillOval(955, 500, 165, 165);
-        gr.setColor(Color.BLACK);
-        gr.drawOval(955, 500, 165, 165);
+        // --- 6. Дорожка к дому ---
+        g.setColor(new Color(210, 180, 140));
+        int[] xPath = {130, 210, 260, 120};
+        int[] yPath = {825, 825, 1000, 1000};
+        g.fillPolygon(xPath, yPath, 4);
 
-        // Яблоки на дереве
-        gr.setColor(Color.RED);
-        gr.fillOval(985, 545, 20, 20);
-        gr.fillOval(1025, 525, 20, 20);
-        gr.fillOval(1075, 540, 20, 20);
-        gr.fillOval(1030, 570, 20, 20);
-        gr.fillOval(985, 600, 20, 20);
-        gr.fillOval(1030, 620, 20, 20);
-        gr.fillOval(1070, 595, 20, 20);
+        // --- 7. Дымоход ---
+        g.setColor(new Color(178, 34, 34));
+        g.fillRect(235, 325, 45, 150);
+        g.fillRect(225, 310, 65, 15);
+        g.setColor(Color.BLACK);
+        g.drawRect(235, 325, 45, 150);
+        g.drawRect(225, 310, 65, 15);
 
-        // Кустик
-        gr.setColor(new Color(0, 128, 0));
-        gr.fillOval(950, 850, 80, 80);
-        gr.fillOval(1000, 850, 80, 80);
-        gr.fillOval(930, 880, 100, 100);
-        gr.fillOval(960, 880, 100, 100);
-        gr.fillOval(990, 880, 100, 100);
+        // --- 8. Полупрозрачный анимационный дым ---
+        for (SmokeParticle particle : smokeList) {
+            int a = (int) Math.max(0, Math.min(255, particle.alpha));
+            g.setColor(new Color(230, 230, 230, a));
+            g.fillOval((int) particle.x, (int) particle.y, (int) particle.size, (int) particle.size);
+        }
 
-        // Ягоды на кустиках
-        gr.setColor(new Color(0, 0, 128));
-        gr.fillOval(980, 870, 20, 20);
-        gr.fillOval(1030, 870, 20, 20);
-        gr.fillOval(960, 925, 20, 20);
-        gr.fillOval(1000, 925, 20, 20);
-        gr.fillOval(1040, 925, 20, 20);
+        // --- 9. Крыша дома ---
+        g.setColor(new Color(178, 34, 34));
+        int[] xRoof = {15, 175, 335};
+        int[] yRoof = {525, 360, 525};
+        g.fillPolygon(xRoof, yRoof, 3);
+        g.setColor(Color.BLACK);
+        g.drawPolygon(xRoof, yRoof, 3);
+
+        // --- 10. Основание дома ---
+        g.setColor(new Color(255, 239, 213));
+        g.fillRect(25, 525, 300, 300);
+        g.setColor(Color.BLACK);
+        g.drawRect(25, 525, 300, 300);
+
+        // Окна
+        drawWindow(g, 60, 565);
+        drawWindow(g, 200, 565);
+
+        // Дверь и ручка
+        g.setColor(new Color(139, 69, 19));
+        g.fillRect(130, 725, 80, 100);
+        g.setColor(Color.BLACK);
+        g.drawRect(130, 725, 80, 100);
+        g.setColor(Color.YELLOW);
+        g.fillOval(135, 775, 8, 8);
+
+        // --- 11. Низкий заборчик перед домом ---
+        drawFence(g, 0, 780, 450);
+
+        // --- 12. Фруктовый сад ---
+        drawDetailedTree(g, 650, 450, new Color(34, 139, 34));
+        drawFruit(g, 650, 450, Color.RED, 12); // Яблоня
+
+        drawDetailedTree(g, 880, 420, new Color(46, 139, 87));
+        drawFruit(g, 880, 420, new Color(255, 215, 0), 10); // Груша
+
+        drawDetailedTree(g, 1050, 480, new Color(60, 179, 113));
+        drawFruit(g, 1050, 480, new Color(255, 140, 0), 10); // Апельсин
+
+        // --- 13. Кусты ---
+        drawDetailedBush(g, 480, 700, 100, new Color(0, 100, 0));
+        drawFruitOnBush(g, 480, 700, Color.RED);
+
+        drawDetailedBush(g, 580, 730, 120, new Color(34, 139, 34));
+        drawFruitOnBush(g, 580, 730, new Color(75, 0, 130));
+
+        drawDetailedBush(g, 920, 750, 110, new Color(0, 128, 0));
+        drawFruitOnBush(g, 920, 750, Color.RED);
+    }
+
+    // Вспомогательный метод: Отрисовка анимированной птицы
+    private void drawAnimatedBird(Graphics2D g, int x, int y, double wingFlap) {
+        g.setColor(Color.BLACK);
+        g.setStroke(new BasicStroke(2));
+
+        // Взмах крыльев регулируется высотой дуги (высота = 15 + wingFlap)
+        int wingHeight = (int) Math.max(5, 15 + wingFlap);
+
+        g.drawArc(x, y, 20, wingHeight, 0, 180);
+        g.drawArc(x + 20, y, 20, wingHeight, 0, 180);
+    }
+
+    private void drawWindow(Graphics2D g, int x, int y) {
+        g.setColor(new Color(173, 216, 230));
+        g.fillRect(x, y, 80, 90);
+        g.setColor(Color.BLACK);
+        g.drawRect(x, y, 80, 90);
+        g.drawLine(x + 40, y, x + 40, y + 90);
+        g.drawLine(x, y + 45, x + 80, y + 45);
+    }
+
+    private void drawCloud(Graphics2D g, int x, int y, double scale) {
+        g.setColor(Color.WHITE);
+        g.fillOval(x, y, (int)(150 * scale), (int)(50 * scale));
+        g.fillOval(x + (int)(20 * scale), y - (int)(20 * scale), (int)(60 * scale), (int)(60 * scale));
+        g.fillOval(x + (int)(60 * scale), y - (int)(30 * scale), (int)(70 * scale), (int)(70 * scale));
+    }
+
+    private void drawDetailedTree(Graphics2D g, int x, int y, Color foliageColor) {
+        g.setColor(new Color(101, 67, 33));
+        g.fillRect(x + 35, y + 100, 40, 150);
+
+        g.setColor(foliageColor);
+        int[][] leafOffsets = {
+                {-30, 0}, {0, -40}, {40, -30}, {70, 10}, {50, 50},
+                {10, 60}, {-30, 40}, {0, 0}, {20, 20}, {-10, -20}
+        };
+
+        for (int[] offset : leafOffsets) {
+            g.fillOval(x + offset[0], y + offset[1], 70, 70);
+        }
+    }
+
+    private void drawFruit(Graphics2D g, int x, int y, Color color, int count) {
+        g.setColor(color);
+        int[][] fruitPositions = {
+                {0, 10}, {30, -10}, {60, 20}, {10, 40}, {40, 50},
+                {-10, 30}, {70, 50}, {20, 70}, {50, 80}, {0, 80}
+        };
+
+        for (int i = 0; i < Math.min(count, fruitPositions.length); i++) {
+            g.fillOval(x + fruitPositions[i][0] + 15, y + fruitPositions[i][1] + 10, 16, 16);
+        }
+    }
+
+    private void drawDetailedBush(Graphics2D g, int x, int y, int size, Color color) {
+        g.setColor(color);
+        g.fillOval(x, y, size, size / 2 + 10);
+        g.fillOval(x - 20, y + 10, size / 2 + 20, size / 2);
+        g.fillOval(x + size / 2, y + 10, size / 2 + 20, size / 2);
+    }
+
+    private void drawFruitOnBush(Graphics2D g, int x, int y, Color color) {
+        g.setColor(color);
+        g.fillOval(x + 15, y + 15, 12, 12);
+        g.fillOval(x + 45, y + 10, 12, 12);
+        g.fillOval(x + 75, y + 20, 12, 12);
+        g.fillOval(x + 30, y + 30, 12, 12);
+    }
+
+    private void drawFence(Graphics2D g, int startX, int y, int width) {
+        g.setColor(new Color(222, 184, 135));
+        int plankWidth = 15;
+        int gap = 10;
+
+        g.fillRect(startX, y + 20, width, 8);
+        g.fillRect(startX, y + 50, width, 8);
+
+        for (int px = startX; px < startX + width; px += plankWidth + gap) {
+            int[] xP = {px, px + plankWidth / 2, px + plankWidth, px + plankWidth, px};
+            int[] yP = {y + 10, y, y + 10, y + 70, y + 70};
+            g.fillPolygon(xP, yP, 5);
+            g.setColor(Color.BLACK);
+            g.drawPolygon(xP, yP, 5);
+            g.setColor(new Color(222, 184, 135));
+        }
+    }
+
+    public static void main(String[] args) {
+        JFrame frame = new JFrame("Сад и дом - Задание по КГ");
+        DrawPanel panel = new DrawPanel();
+
+        frame.add(panel);
+        frame.setSize(1200, 1000);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setLocationRelativeTo(null);
+        frame.setVisible(true);
     }
 }
