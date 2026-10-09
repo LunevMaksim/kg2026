@@ -2,8 +2,32 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="aec15fd5-1ceb-4202-b585-6f50090bca86" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/ru/vsu/cs/kg26/g72/lunevmaksim/demo1/AnimationExample.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/ru/vsu/cs/kg26/g72/lunevmaksim/demo1/objects/Bird.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/ru/vsu/cs/kg26/g72/lunevmaksim/demo1/objects/Bush.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/ru/vsu/cs/kg26/g72/lunevmaksim/demo1/objects/Cloud.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/ru/vsu/cs/kg26/g72/lunevmaksim/demo1/objects/Fence.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/ru/vsu/cs/kg26/g72/lunevmaksim/demo1/objects/Ground.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/ru/vsu/cs/kg26/g72/lunevmaksim/demo1/objects/House.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/ru/vsu/cs/kg26/g72/lunevmaksim/demo1/objects/Path.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/ru/vsu/cs/kg26/g72/lunevmaksim/demo1/objects/Sky.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/ru/vsu/cs/kg26/g72/lunevmaksim/demo1/objects/SmokeParticle.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/ru/vsu/cs/kg26/g72/lunevmaksim/demo1/objects/Sun.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/ru/vsu/cs/kg26/g72/lunevmaksim/demo1/objects/Tree.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/ru/vsu/cs/kg26/g72/lunevmaksim/demo1/DrawPanel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/ru/vsu/cs/kg26/g72/lunevmaksim/demo1/DrawPanel.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ru/vsu/cs/kg26/g72/lunevmaksim/demo1/models/Drawable.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/ru/vsu/cs/kg26/g72/lunevmaksim/demo1/models/Drawable.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ru/vsu/cs/kg26/g72/lunevmaksim/demo1/models/Updatable.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/ru/vsu/cs/kg26/g72/lunevmaksim/demo1/models/Updatable.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ru/vsu/cs/kg26/g72/lunevmaksim/demo1/object/Bird.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ru/vsu/cs/kg26/g72/lunevmaksim/demo1/object/Bush.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ru/vsu/cs/kg26/g72/lunevmaksim/demo1/object/Cloud.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ru/vsu/cs/kg26/g72/lunevmaksim/demo1/object/Fence.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ru/vsu/cs/kg26/g72/lunevmaksim/demo1/object/Ground.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ru/vsu/cs/kg26/g72/lunevmaksim/demo1/object/House.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ru/vsu/cs/kg26/g72/lunevmaksim/demo1/object/Path.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ru/vsu/cs/kg26/g72/lunevmaksim/demo1/object/Sky.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ru/vsu/cs/kg26/g72/lunevmaksim/demo1/object/SmokeParticle.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ru/vsu/cs/kg26/g72/lunevmaksim/demo1/object/Sun.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ru/vsu/cs/kg26/g72/lunevmaksim/demo1/object/Tree.java" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -13,6 +37,7 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
+        <option value="Interface" />
         <option value="Class" />
       </list>
     </option>
@@ -54,6 +79,8 @@
     "git-widget-placeholder": "main",
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "/home/maksim/IdeaProjects/learnSql",
+    "node.js.detected.package.jshint": "true",
+    "node.js.selected.package.jshint": "",
     "nodejs_package_manager_path": "npm",
     "onboarding.tips.debug.path": "/home/maksim/IdeaProjects/kg2026/src/Main.java",
     "settings.editor.selected.configurable": "preferences.pluginManager"
