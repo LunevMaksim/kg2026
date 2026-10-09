@@ -10,11 +10,9 @@ import java.util.Random;
 
 public class DrawPanel extends JPanel {
 
-    // Класс для частицы дыма
+    // Вспомогательный класс для частицы дыма
     private static class SmokeParticle {
-        double x, y;
-        double size;
-        double alpha;
+        double x, y, size, alpha;
 
         public SmokeParticle(double x, double y, double size, double alpha) {
             this.x = x;
@@ -24,11 +22,9 @@ public class DrawPanel extends JPanel {
         }
     }
 
-    // Класс для анимированной птицы
+    // Вспомогательный класс для анимированной птицы
     private static class Bird {
-        double x, baseY;
-        double speed;
-        double wingPhase; // Фаза взмаха крыльев
+        double x, baseY, speed, wingPhase;
 
         public Bird(double x, double baseY, double speed, double wingPhase) {
             this.x = x;
@@ -38,33 +34,112 @@ public class DrawPanel extends JPanel {
         }
     }
 
+    // Класс для параметров случайного дерева
+    private static class TreeSpec {
+        int x, y;
+        Color foliageColor;
+        Color fruitColor;
+        int fruitCount;
+
+        public TreeSpec(int x, int y, Color foliageColor, Color fruitColor, int fruitCount) {
+            this.x = x;
+            this.y = y;
+            this.foliageColor = foliageColor;
+            this.fruitColor = fruitColor;
+            this.fruitCount = fruitCount;
+        }
+    }
+
+    // Класс для параметров случайного куста
+    private static class BushSpec {
+        int x, y, size;
+        Color bushColor;
+        Color berryColor;
+
+        public BushSpec(int x, int y, int size, Color bushColor, Color berryColor) {
+            this.x = x;
+            this.y = y;
+            this.size = size;
+            this.bushColor = bushColor;
+            this.berryColor = berryColor;
+        }
+    }
+
     private final List<SmokeParticle> smokeList = new ArrayList<>();
     private final List<Bird> birdList = new ArrayList<>();
-    private final Random random = new Random();
+    private final List<TreeSpec> treeList = new ArrayList<>();
+    private final List<BushSpec> bushList = new ArrayList<>();
 
-    private int cloudOffsetX = 0; // Для движения облаков
-    private double animTime = 0;  // Общее время для анимации синусоиды
+    private final Random random = new Random();
+    private int cloudOffsetX = 0;
+    private double animTime = 0;
 
     public DrawPanel() {
-        // Начальные частицы дыма
+        // 1. Создаем начальные частицы дыма
         for (int i = 0; i < 6; i++) {
             smokeList.add(new SmokeParticle(260, 310 - i * 35, 30 + i * 8, 200 - i * 30));
         }
 
-        // Создаем стаю птиц на разной высоте и с разной скоростью
+        // 2. Создаем птиц
         birdList.add(new Bird(100, 150, 2.5, 0.0));
         birdList.add(new Bird(150, 130, 2.7, 0.5));
         birdList.add(new Bird(220, 170, 2.3, 1.0));
         birdList.add(new Bird(600, 120, 3.0, 0.2));
         birdList.add(new Bird(660, 140, 2.8, 0.8));
 
-        // Таймер обновления кадра (~30 FPS)
+        // 3. РАНДОМНАЯ ГЕНЕРАЦИЯ ДЕРЕВЬЕВ В САДУ (3-4 дерева)
+        Color[] foliageColors = {
+                new Color(34, 139, 34),   // Лесная зелень
+                new Color(46, 139, 87),   // Морская зелень
+                new Color(60, 179, 113),  // Светло-зеленый
+                new Color(0, 128, 0)      // Классический зеленый
+        };
+
+        Color[] fruitColors = {
+                Color.RED,                // Яблоко
+                new Color(255, 215, 0),   // Груша (желтая)
+                new Color(255, 140, 0),   // Апельсин
+                new Color(147, 112, 219)  // Слива (фиолетовая)
+        };
+
+        int numberOfTrees = 3 + random.nextInt(2); // от 3 до 4 деревьев
+        for (int i = 0; i < numberOfTrees; i++) {
+            // Равномерно распределяем зоны по X справа от дома (от 480 до 1050)
+            int x = 480 + (i * 200) + random.nextInt(40);
+            int y = 420 + random.nextInt(60); // Небольшой случайный сдвиг по высоте
+            Color foliage = foliageColors[random.nextInt(foliageColors.length)];
+            Color fruit = fruitColors[random.nextInt(fruitColors.length)];
+            int count = 8 + random.nextInt(5);
+
+            treeList.add(new TreeSpec(x, y, foliage, fruit, count));
+        }
+
+        // 4. РАНДОМНАЯ ГЕНЕРАЦИЯ КУСТОВ (4-6 кустов)
+        Color[] berryColors = {
+                Color.RED,
+                new Color(75, 0, 130),   // Темно-синяя ягода
+                new Color(220, 20, 60),  // Малиновая
+                new Color(0, 0, 128)     // Черника
+        };
+
+        int numberOfBushes = 4 + random.nextInt(3); // от 4 до 6 кустов
+        for (int i = 0; i < numberOfBushes; i++) {
+            int x = 450 + random.nextInt(650); // На пространстве сада
+            int y = 700 + random.nextInt(80);  // На переднем/среднем плане травы
+            int size = 90 + random.nextInt(40);
+            Color bushColor = foliageColors[random.nextInt(foliageColors.length)];
+            Color berryColor = berryColors[random.nextInt(berryColors.length)];
+
+            bushList.add(new BushSpec(x, y, size, bushColor, berryColor));
+        }
+
+        // Таймер перерисовки (~30 FPS)
         Timer timer = new Timer(33, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                animTime += 0.15; // Увеличиваем счетчик времени анимации
+                animTime += 0.15;
 
-                // 1. Анимация дыма
+                // Дым
                 for (SmokeParticle particle : smokeList) {
                     particle.y -= 2.0;
                     particle.x += 1.5;
@@ -79,20 +154,18 @@ public class DrawPanel extends JPanel {
                     }
                 }
 
-                // 2. Анимация движения облаков
+                // Облака
                 cloudOffsetX += 1;
                 if (cloudOffsetX > 1200) {
                     cloudOffsetX = -400;
                 }
 
-                // 3. Анимация птиц
+                // Птицы
                 for (Bird bird : birdList) {
-                    bird.x += bird.speed; // Полёт вправо
-
-                    // Если птица улетела за экран, возвращаем её влево
+                    bird.x += bird.speed;
                     if (bird.x > 1250) {
                         bird.x = -60;
-                        bird.baseY = 100 + random.nextInt(120); // Смена высоты
+                        bird.baseY = 100 + random.nextInt(120);
                     }
                 }
 
@@ -107,7 +180,6 @@ public class DrawPanel extends JPanel {
         super.paintComponent(gr);
         Graphics2D g = (Graphics2D) gr;
 
-        // Включаем сглаживание
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
         // --- 1. Небо ---
@@ -127,22 +199,19 @@ public class DrawPanel extends JPanel {
             g.drawLine(startX, startY, endX, endY);
         }
 
-        // --- 3. Облака (движущиеся) ---
+        // --- 3. Облака ---
         drawCloud(g, 100 + cloudOffsetX, 100, 1.0);
         drawCloud(g, -500 + cloudOffsetX, 150, 0.8);
         drawCloud(g, 600 + cloudOffsetX, 80, 1.2);
 
-        // --- 4. Анимированные Птицы в небе ---
+        // --- 4. Птицы ---
         for (Bird bird : birdList) {
-            // Волнообразное покачивание по Y за счет sin()
             double currentY = bird.baseY + Math.sin(animTime + bird.wingPhase) * 5.0;
-            // Амплитуда взмаха крыла меняется со временем
             double wingFlap = Math.sin(animTime * 2 + bird.wingPhase) * 10.0;
-
             drawAnimatedBird(g, (int) bird.x, (int) currentY, wingFlap);
         }
 
-        // --- 5. Земля / Трава ---
+        // --- 5. Трава ---
         g.setColor(new Color(124, 252, 0));
         g.fillRect(0, 650, 1200, 350);
 
@@ -160,7 +229,7 @@ public class DrawPanel extends JPanel {
         g.drawRect(235, 325, 45, 150);
         g.drawRect(225, 310, 65, 15);
 
-        // --- 8. Полупрозрачный анимационный дым ---
+        // --- 8. Анимация дыма ---
         for (SmokeParticle particle : smokeList) {
             int a = (int) Math.max(0, Math.min(255, particle.alpha));
             g.setColor(new Color(230, 230, 230, a));
@@ -185,7 +254,7 @@ public class DrawPanel extends JPanel {
         drawWindow(g, 60, 565);
         drawWindow(g, 200, 565);
 
-        // Дверь и ручка
+        // Дверь
         g.setColor(new Color(139, 69, 19));
         g.fillRect(130, 725, 80, 100);
         g.setColor(Color.BLACK);
@@ -193,38 +262,26 @@ public class DrawPanel extends JPanel {
         g.setColor(Color.YELLOW);
         g.fillOval(135, 775, 8, 8);
 
-        // --- 11. Низкий заборчик перед домом ---
+        // --- 11. Забор перед домом ---
         drawFence(g, 0, 780, 450);
 
-        // --- 12. Фруктовый сад ---
-        drawDetailedTree(g, 650, 450, new Color(34, 139, 34));
-        drawFruit(g, 650, 450, Color.RED, 12); // Яблоня
+        // --- 12. ОТРИСОВКА СГЕНЕРИРОВАННЫХ ДЕРЕВЬЕВ ---
+        for (TreeSpec tree : treeList) {
+            drawDetailedTree(g, tree.x, tree.y, tree.foliageColor);
+            drawFruit(g, tree.x, tree.y, tree.fruitColor, tree.fruitCount);
+        }
 
-        drawDetailedTree(g, 880, 420, new Color(46, 139, 87));
-        drawFruit(g, 880, 420, new Color(255, 215, 0), 10); // Груша
-
-        drawDetailedTree(g, 1050, 480, new Color(60, 179, 113));
-        drawFruit(g, 1050, 480, new Color(255, 140, 0), 10); // Апельсин
-
-        // --- 13. Кусты ---
-        drawDetailedBush(g, 480, 700, 100, new Color(0, 100, 0));
-        drawFruitOnBush(g, 480, 700, Color.RED);
-
-        drawDetailedBush(g, 580, 730, 120, new Color(34, 139, 34));
-        drawFruitOnBush(g, 580, 730, new Color(75, 0, 130));
-
-        drawDetailedBush(g, 920, 750, 110, new Color(0, 128, 0));
-        drawFruitOnBush(g, 920, 750, Color.RED);
+        // --- 13. ОТРИСОВКА СГЕНЕРИРОВАННЫХ КУСТОВ ---
+        for (BushSpec bush : bushList) {
+            drawDetailedBush(g, bush.x, bush.y, bush.size, bush.bushColor);
+            drawFruitOnBush(g, bush.x, bush.y, bush.berryColor);
+        }
     }
 
-    // Вспомогательный метод: Отрисовка анимированной птицы
     private void drawAnimatedBird(Graphics2D g, int x, int y, double wingFlap) {
         g.setColor(Color.BLACK);
         g.setStroke(new BasicStroke(2));
-
-        // Взмах крыльев регулируется высотой дуги (высота = 15 + wingFlap)
         int wingHeight = (int) Math.max(5, 15 + wingFlap);
-
         g.drawArc(x, y, 20, wingHeight, 0, 180);
         g.drawArc(x + 20, y, 20, wingHeight, 0, 180);
     }
