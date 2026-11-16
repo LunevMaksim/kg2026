@@ -4,9 +4,15 @@ import ru.vsu.cs.kg26.g72.lunevmaksim.demo1.models.Drawable;
 import java.awt.*;
 
 public class Fence implements Drawable {
-    private final int startX = 0;
-    private final int y = 780;
-    private final int width = 450;
+    private final int startX;
+    private final int y;
+    private final int width;
+
+    public Fence(int startX, int y, int width) {
+        this.startX = startX;
+        this.y = y;
+        this.width = width;
+    }
 
     @Override
     public void draw(Graphics2D g) {

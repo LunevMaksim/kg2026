@@ -31,22 +31,26 @@ public class DrawPanel extends JPanel {
     private void initScene() {
         Random random = new Random();
 
-        // 1. Статические объекты
-        addGameObject(new Sky());
-        addGameObject(new Sun());
-        addGameObject(new Ground());
-        addGameObject(new Path());
-        addGameObject(new House());
-        addGameObject(new Fence());
+        // Координаты дома
+        int houseX = 25;
+        int houseY = 525;
 
-        // 2. Облака (анимированные)
+        // 1. Объекты
+        addGameObject(new Sky(1200, 700));
+        addGameObject(new Sun(950, 80, 50));
+        addGameObject(new Ground(650, 1200, 350));
+        addGameObject(new Path(houseX + 105, houseY + 300));
+        addGameObject(new House(houseX, houseY));
+        addGameObject(new Fence(0, 780, 450));
+
+        // 2. Облака
         addGameObject(new Cloud(100, 100, 1.0, 1.0));
         addGameObject(new Cloud(-300, 150, 0.8, 0.8));
         addGameObject(new Cloud(600, 80, 1.2, 1.2));
 
         // 3. Дым из трубы
         for (int i = 0; i < 6; i++) {
-            addGameObject(new SmokeParticle(260, 310 - i * 35, 30 + i * 8, 200 - i * 30));
+            addGameObject(new SmokeParticle(houseX + 235, (houseY - 215) - i * 35, 30 + i * 8, 200 - i * 30));
         }
 
         // 4. Птицы
@@ -54,7 +58,7 @@ public class DrawPanel extends JPanel {
         addGameObject(new Bird(150, 130, 2.7, 0.5));
         addGameObject(new Bird(220, 170, 2.3, 1.0));
 
-        // 5. Генерация Деревьев
+        // 5. Деревья
         Color[] foliageColors = { new Color(34, 139, 34), new Color(46, 139, 87), new Color(60, 179, 113) };
         Color[] fruitColors = { Color.RED, new Color(255, 215, 0), new Color(255, 140, 0), new Color(147, 112, 219) };
 
@@ -64,7 +68,7 @@ public class DrawPanel extends JPanel {
             addGameObject(new Tree(x, y, foliageColors[random.nextInt(3)], fruitColors[random.nextInt(4)], 10));
         }
 
-        // 6. Генерация Кустов
+        // 6. Кусты
         Color[] berryColors = { Color.RED, new Color(75, 0, 130), new Color(220, 20, 60) };
         for (int i = 0; i < 4; i++) {
             int x = 450 + random.nextInt(650);
